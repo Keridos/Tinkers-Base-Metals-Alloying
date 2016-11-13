@@ -1,0 +1,8 @@
+material.adamantine.name=Adamantine
+
+fluid.tconstruct.adamantite.name=Adamantite
+
+modifier.crushing.name=Crushing
+modifier.crushing.desc=§oAnnihilate!§r\n Bonus damage against injured targets!
+modifier.tough.name=Tough
+modifier.tough.desc=§oSo Strong!§r\nThis tool is more durable than it seems.

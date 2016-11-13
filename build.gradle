@@ -1,4 +1,3 @@
-
 // For those who want the bleeding edge
 buildscript {
     repositories {
@@ -13,6 +12,8 @@ buildscript {
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 /*
 // for people who want stable - not yet functional for MC 1.8.8 - we require the forgegradle 2.1 snapshot
@@ -34,23 +35,18 @@ if (new File("curseKey.properties").exists()) {
 }
 
 repositories {
-    maven {
-        name = "IGW"
-        url = "http://maven.k-4u.nl/"
-    }
+    mavenLocal()
+    mavenCentral()
     maven { // The repo from which to get waila
         name "Mobius Repo"
         url "http://mobiusstrip.eu/maven"
     }
-    maven { // the repo from which to get EnderIO and tterags mods
-        name 'tterrag'
-        url "http://maven.tterrag.com/"
-    }
-
+	maven {
+        name 'DVS1 Maven FS'
+        url 'http://dvs1.progwml6.com/files/maven'
+  }
 }
-apply plugin: 'forge'
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+
 
 // define the properties file
 ext.configFile = file "project.properties"
@@ -72,19 +68,22 @@ if (hasProperty('appendBuildNumber')) {
 group = "${config.group_id}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${config.mod_id}-${config.minecraft_version}"
 
+
 minecraft {
     version = "${config.forge_version}"
-    if (file('../run').exists()) {
-        runDir = "../run"
-    } else {
-        runDir = "assets"
-    }
+    runDir = "run"
 
+	// the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not allways work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+	mappings = "snapshot_20160701"
+	// makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     replace '@VERSION@', project.version
-	mappings = "snapshot_20160518"
 }
 
-processResources {
+processResources{
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
@@ -92,20 +91,15 @@ processResources {
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-
+                
         // replace version and mcversion
-        expand 'version': project.version, 'mcversion': project.minecraft.version
+        expand 'version':project.version, 'mcversion':project.minecraft.version
     }
-
+        
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-}
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
 }
 
 task deobfJar(type: Jar) {
@@ -116,14 +110,7 @@ task deobfJar(type: Jar) {
 build.dependsOn sourceJar, deobfJar
 
 dependencies {
-    // I dont have to specify NEI.. because gradle magic. aka: transitive dependency resolution
-    compile "igwmod:IGW-Mod-${config.minecraft_version}:${config.igwmod_version}:userdev"
-    compile "mcp.mobius.waila:Waila:${config.waila_version}"
-}
-
-// this fixes dev environments for IDEA 14 users.
-sourceSets {
-    main {
-        output.resourcesDir = output.classesDir
-    }
+    deobfCompile "mezz.jei:jei_${config.minecraft_version}:${config.jei_version}"
+    deobfCompile "slimeknights.mantle:Mantle:${config.minecraft_version}-${config.mantle_version}:deobf"
+    compile "slimeknights:TConstruct:${config.minecraft_version_short}-${config.ticon_version}:deobf"
 }
